@@ -7,7 +7,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <div x-data="{count:0}">
-    <button x-on:click="count++">Increment</button>
+    <button class="btn" x-on:click="count++">Increment</button>
     <p x-text="count"></p>
   </div>
 </Layout>
