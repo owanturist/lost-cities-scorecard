@@ -1,10 +1,175 @@
 ---
 import Layout from "../layouts/Layout.astro";
+
+const EXPEDITIONS = [
+  {
+    name: "yellow",
+    bg: "bg-yellow-500",
+    text: "text-yellow-500",
+    variable: "--color-yellow-500",
+  },
+  {
+    name: "blue",
+    bg: "bg-blue-500",
+    text: "text-blue-500",
+    variable: "--color-blue-500",
+  },
+  {
+    name: "gray",
+    bg: "bg-gray-200",
+    text: "text-gray-200",
+    variable: "--color-gray-200",
+  },
+  {
+    name: "green",
+    bg: "bg-green-500",
+    text: "text-green-500",
+    variable: "--color-green-500",
+  },
+  {
+    name: "red",
+    bg: "bg-red-500",
+    text: "text-red-500",
+    variable: "--color-red-500",
+  },
+];
+
+const SCORES = [
+  { score: 1, emoji: "1️⃣" },
+  { score: 2, emoji: "2️⃣" },
+  { score: 3, emoji: "3️⃣" },
+  { score: 4, emoji: "4️⃣" },
+  { score: 5, emoji: "5️⃣" },
+  { score: 6, emoji: "6️⃣" },
+  { score: 7, emoji: "7️⃣" },
+  { score: 8, emoji: "8️⃣" },
+  { score: 9, emoji: "9️⃣" },
+  { score: 10, emoji: "🔟" },
+];
 ---
 
+<script>
+  import Alpine from "alpinejs";
+
+  Alpine.data("expedition", () => ({
+    wagers: 0,
+    rotateWagers() {
+      this.wagers = (this.wagers + 1) % 4;
+    },
+
+    scores: new Set<number>(),
+    toggleScore(score: number) {
+      if (this.scores.has(score)) {
+        this.scores.delete(score);
+      } else {
+        this.scores.add(score);
+      }
+    },
+
+    get totalScore() {
+      const totalCards = this.scores.size + this.wagers;
+
+      if (totalCards === 0) {
+        return 0;
+      }
+
+      const scores = Array.from(this.scores).reduce(
+        (acc, score) => acc + score,
+        0
+      );
+
+      const bigExpeditionBonus = totalCards >= 8 ? 20 : 0;
+
+      return (scores - 20) * (this.wagers + 1) + bigExpeditionBonus;
+    },
+  }));
+</script>
 <Layout>
-  <div x-data="{count:0}">
-    <button class="btn" x-on:click="count++">Increment</button>
-    <p x-text="count"></p>
+  <div
+    class="py-3"
+    x-data={`{
+      ${EXPEDITIONS.map(({ name }) => `${name}: expedition(),`).join("")}
+      get total() {
+        return ${EXPEDITIONS.map(({ name }) => `this.${name}.totalScore`).join(" + ")};
+      }
+    }`}
+  >
+    <table class="table table-sm text-center">
+      <thead>
+        <tr>
+          <th></th>
+
+          {
+            EXPEDITIONS.map(({ bg }) => (
+              <th>
+                <div class:list={["m-auto size-6 rounded-full", bg]} />
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <th class="text-xl">🤝</th>
+
+          {
+            EXPEDITIONS.map(({ name, variable }) => (
+              <td>
+                <button
+                  name={`wager-${name}`}
+                  x-text={`${name}.wagers`}
+                  x-on:click={`(${name}.rotateWagers())`}
+                  style={{ "--btn-color": `var(${variable})` }}
+                  x-bind:class={`${name}.wagers === 0 ? 'btn-outline' : 'text-accent-content'`}
+                  class="btn btn-xs"
+                />
+              </td>
+            ))
+          }
+        </tr>
+
+        {
+          SCORES.map(({ score, emoji }) => (
+            <tr>
+              <th class="text-xl">{emoji}</th>
+
+              {EXPEDITIONS.map(({ name, text }) => (
+                <td>
+                  <input
+                    name={`score-${name}-${score}`}
+                    type="checkbox"
+                    class:list={["checkbox", text]}
+                    x-bind:checked={`${name}.scores.has(${score})`}
+                    x-on:change={`(${name}.toggleScore(${score}))`}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))
+        }
+
+        <tfoot>
+          <tr>
+            <th class="text-xl">🧮</th>
+
+            {
+              EXPEDITIONS.map(({ name }) => (
+                <td>
+                  <span x-text={`${name}.totalScore`} />
+                </td>
+              ))
+            }
+          </tr>
+        </tfoot>
+      </tbody>
+    </table>
+
+    <div class="divider"></div>
+
+    <div class="stat">
+      <div class="stat-title">Total</div>
+      <div class="stat-value" x-text="total"></div>
+    </div>
   </div>
 </Layout>
