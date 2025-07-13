@@ -1,5 +1,5 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Root from "../layouts/root.astro";
 
 const EXPEDITIONS = [
   {
@@ -135,7 +135,7 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
     },
   }));
 </script>
-<Layout>
+<Root>
   <div
     class="py-3"
     x-data={`{
@@ -257,4 +257,4 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
       <span>&nbsp;</span>
     </div>
   </div>
-</Layout>
+</Root>
