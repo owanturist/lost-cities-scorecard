@@ -1,9 +1,36 @@
 ---
+import ThemeSwitcher from "../components/theme-switcher.astro";
 import "../styles.css";
 ---
 
-<!doctype html>
-<html lang="en" class="size-full">
+<script>
+  import Alpine from "alpinejs";
+
+  const LOCAL_STORAGE_THEME_KEY = "saved-theme";
+
+  Alpine.data("theme", () => ({
+    get current() {
+      const theme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY);
+
+      if (theme === "dark" || theme === "light") {
+        return theme;
+      }
+
+      // fallback to the user's prefers-color-schema
+      if (window.matchMedia?.("(prefers-color-scheme: light)").matches) {
+        return "light";
+      }
+
+      return "dark";
+    },
+
+    setTheme(theme: string) {
+      localStorage.setItem(LOCAL_STORAGE_THEME_KEY, theme);
+    },
+  }));
+</script>
+
+<html lang="en" class="size-full" x-data="{theme: theme()}" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -13,8 +40,17 @@ import "../styles.css";
   </head>
 
   <body class="size-full flex flex-col">
-    <div class="navbar bg-base-200 shadow-sm">
-      <a class="btn btn-ghost text-xl">Lost Cities Scorecard</a>
+    <div class="navbar px-3 bg-base-200 shadow-sm">
+      <div class="flex-1">
+        <span class="text-xl font-semibold">Lost Cities Scorecard</span>
+      </div>
+
+      <div class="flex-none">
+        <ThemeSwitcher
+          x-bind:checked="theme.current === 'dark'"
+          x-on:change="theme.setTheme($event.target.checked ? 'dark' : 'light')"
+        />
+      </div>
     </div>
 
     <div class="overflow-y-auto">

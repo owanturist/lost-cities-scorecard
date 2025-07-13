@@ -9,6 +9,10 @@
   --font-mono: "Roboto Mono Variable", "Roboto Mono", "monospace";
 }
 
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+}
+
 /* https://alpinejs.dev/directives/cloak */
 [x-cloak] {
   display: none !important;
