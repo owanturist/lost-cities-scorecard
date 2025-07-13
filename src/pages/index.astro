@@ -4,15 +4,15 @@ import Root from "../layouts/root.astro";
 const EXPEDITIONS = [
   {
     name: "blue",
-    background: { checked: "aria-checked:bg-blue-500" },
-    text: "text-blue-500",
-    border: "border-blue-500",
+    background: { checked: "aria-checked:bg-blue-400" },
+    text: "text-blue-400",
+    border: "border-blue-400",
   },
   {
     name: "yellow",
-    background: { checked: "aria-checked:bg-yellow-500" },
-    text: "text-yellow-500",
-    border: "border-yellow-500",
+    background: { checked: "aria-checked:bg-yellow-400" },
+    text: "text-yellow-400",
+    border: "border-yellow-400",
   },
   {
     name: "gray",
@@ -22,15 +22,15 @@ const EXPEDITIONS = [
   },
   {
     name: "green",
-    background: { checked: "aria-checked:bg-green-500" },
-    text: "text-green-500",
-    border: "border-green-500",
+    background: { checked: "aria-checked:bg-green-400" },
+    text: "text-green-400",
+    border: "border-green-400",
   },
   {
     name: "red",
-    background: { checked: "aria-checked:bg-red-500" },
-    text: "text-red-500",
-    border: "border-red-500",
+    background: { checked: "aria-checked:bg-red-400" },
+    text: "text-red-400",
+    border: "border-red-400",
   },
 ];
 
@@ -119,11 +119,11 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
               .join(" + ");
 
       return [
+        this.multiplier > 1 ? `${this.multiplier} × ` : "",
         "(",
         scores,
         ` - ${EXPEDITION_COST}`,
         ")",
-        this.multiplier > 1 ? ` × ${this.multiplier}` : "",
         this.bonus > 0 ? ` + ${this.bonus}` : "",
       ]
         .filter((fragment) => fragment.length > 0)
@@ -205,13 +205,22 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
           <tr>
             {
               EXPEDITIONS.map(({ name }, index, arr) => (
-                <td class="relative">
+                <td>
                   <span
-                    class="tooltip select-none underline-offset-4 decoration-dotted"
-                    x-bind:data-tip={`${name}.totalScoreHint`}
-                    x-text={`${name}.totalScore`}
+                    class="tooltip w-full select-none underline-offset-4 decoration-dotted"
                     x-bind:class={`${name}.totalScore === 0 ? 'cursor-default' : 'cursor-help underline'`}
-                  />
+                  >
+                    <span
+                      class:list={[
+                        "tooltip-content",
+                        index < 3 && "!left-0 !right-auto !transform-none",
+                        index > arr.length - 3 &&
+                          "!right-0 !left-auto !transform-none",
+                      ]}
+                      x-text={`${name}.totalScoreHint`}
+                    />
+                    <span x-text={`${name}.totalScore`} />
+                  </span>
 
                   {index > 0 && (
                     <span class="absolute right-full inset-y-0 flex items-center">
