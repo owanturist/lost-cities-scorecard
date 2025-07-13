@@ -1,5 +1,13 @@
+@import "@fontsource-variable/roboto";
+@import "@fontsource-variable/roboto-mono";
+
 @import "tailwindcss";
 @plugin "daisyui";
+
+@theme {
+  --font-sans: "Roboto Variable", "Roboto", "sans-serif";
+  --font-mono: "Roboto Mono Variable", "Roboto Mono", "monospace";
+}
 
 /* https://alpinejs.dev/directives/cloak */
 [x-cloak] {
