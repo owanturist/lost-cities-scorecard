@@ -153,16 +153,15 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
       }
     }`}
   >
-    <table
-      class="!grid table table-sm text-center"
-      x-bind:style={`'grid-template-areas:' + (mirror ? '"${GRID_TEMPLATE_AREAS.slice().reverse().join(" ")}";' : '"${GRID_TEMPLATE_AREAS.join(" ")}";')`}
-    >
+    <table class="!grid grid-cols-5 table table-sm text-center">
       <tbody class="grid grid-cols-subgrid col-span-full">
         {
           WAGERS.map((wager) => (
             <tr class="grid grid-cols-subgrid col-span-full">
-              {EXPEDITIONS.map(({ name, btn }) => (
-                <td style={`grid-area:${name};`}>
+              {EXPEDITIONS.map(({ name, btn }, index, arr) => (
+                <td
+                  x-bind:style={`'order:' + (mirror ? ${arr.length - index} : ${index}) + ';'`}
+                >
                   <button
                     name={`${name}-wager-${wager}`}
                     type="button"
@@ -185,8 +184,10 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
         {
           SCORES.map((score) => (
             <tr class="grid grid-cols-subgrid col-span-full">
-              {EXPEDITIONS.map(({ name, btn }) => (
-                <td style={`grid-area:${name};`}>
+              {EXPEDITIONS.map(({ name, btn }, index, arr) => (
+                <td
+                  x-bind:style={`'order:' + (mirror ? ${arr.length - index} : ${index}) + ';'`}
+                >
                   <button
                     name={`${name}-score-${score}`}
                     type="button"
@@ -210,7 +211,9 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
           <tr class="grid grid-cols-subgrid col-span-full">
             {
               EXPEDITIONS.map(({ name }, index, arr) => (
-                <td style={`grid-area:${name};`}>
+                <td
+                  x-bind:style={`'order:' + (mirror ? ${arr.length - index} : ${index}) + ';'`}
+                >
                   <span
                     class="tooltip w-full select-none underline-offset-4 decoration-dotted"
                     x-bind:class={`${name}.totalScore === 0 ? 'cursor-default' : 'cursor-help underline'`}
