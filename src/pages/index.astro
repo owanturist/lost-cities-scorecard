@@ -42,9 +42,19 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 <script>
   import Alpine from "alpinejs";
 
+  const EXPEDITION_COST = 20;
+
   Alpine.data("expedition", () => ({
     get size() {
       return this.wagers.size + this.scores.size;
+    },
+
+    get bonus() {
+      return this.size >= 8 ? 20 : 0;
+    },
+
+    get multiplier() {
+      return this.wagers.size + 1;
     },
 
     wagers: new Set<number>(),
@@ -84,21 +94,44 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
       }
     },
 
+    get scoresSum() {
+      return Array.from(this.scores).reduce((acc, score) => acc + score, 0);
+    },
+
     get totalScore() {
       if (this.size === 0) {
         return 0;
       }
 
-      const scores = Array.from(this.scores).reduce(
-        (acc, score) => acc + score,
-        0
-      );
+      return (this.scoresSum - EXPEDITION_COST) * this.multiplier + this.bonus;
+    },
 
-      const expeditionCost = 20;
-      const bigExpeditionBonus = this.size >= 8 ? 20 : 0;
-      const multiplier = this.wagers.size + 1;
+    get totalScoreHint() {
+      if (this.size === 0) {
+        return [];
+      }
 
-      return (scores - expeditionCost) * multiplier + bigExpeditionBonus;
+      const scores =
+        this.scores.size === 0
+          ? "0"
+          : Array.from(this.scores)
+              .sort((left, right) => left - right)
+              .join(" + ");
+
+      const expeditionCost = `Expedition cost: -${EXPEDITION_COST}`;
+      const wages = `Wages: ${this.wagers.size} = ×${this.multiplier}`;
+      const bonus = this.bonus > 0 ? `Bonus: ${this.bonus}` : null;
+
+      return [
+        "(",
+        scores,
+        ` - ${EXPEDITION_COST}`,
+        ")",
+        this.multiplier > 1 ? ` × ${this.multiplier}` : "",
+        this.bonus > 0 ? ` + ${this.bonus}` : "",
+      ]
+        .filter((fragment) => fragment.length > 0)
+        .join("");
     },
   }));
 </script>
@@ -107,24 +140,13 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
     class="py-3"
     x-data={`{
       ${EXPEDITIONS.map(({ name }) => `${name}: expedition(),`).join("")}
+
       get total() {
         return ${EXPEDITIONS.map(({ name }) => `this.${name}.totalScore`).join(" + ")};
       }
     }`}
   >
     <table class="table table-sm text-center">
-      <thead>
-        <tr>
-          {
-            EXPEDITIONS.map(() => (
-              <th>
-                <div class:list={["m-auto size-6 rounded-full bg-red-500"]} />
-              </th>
-            ))
-          }
-        </tr>
-      </thead>
-
       <tbody>
         {
           WAGERS.map((wager) => (
@@ -161,7 +183,7 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
                     x-bind:aria-checked={`${name}.scores.has(${score})`}
                     x-on:click={`(${name}.toggleScore(${score}))`}
                     class:list={[
-                      "btn btn-square btn-xs aria-checked:text-accent-content",
+                      "btn btn-square btn-xs aria-checked:text-base-100",
                       text,
                       border,
                       background.checked,
@@ -175,12 +197,17 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
           ))
         }
 
-        <tfoot>
+        <tfoot class="border-t-4">
           <tr>
             {
               EXPEDITIONS.map(({ name }) => (
                 <td>
-                  <span x-text={`${name}.totalScore`} />
+                  <span
+                    class="tooltip select-none underline-offset-4 decoration-dotted"
+                    x-bind:data-tip={`${name}.totalScoreHint`}
+                    x-text={`${name}.totalScore`}
+                    x-bind:class={`${name}.totalScore === 0 ? 'cursor-default' : 'cursor-help underline'`}
+                  />
                 </td>
               ))
             }
@@ -188,8 +215,6 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
         </tfoot>
       </tbody>
     </table>
-
-    <div class="divider"></div>
 
     <div class="stat">
       <div class="stat-title">Total</div>
