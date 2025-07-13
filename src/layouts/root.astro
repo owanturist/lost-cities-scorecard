@@ -5,6 +5,9 @@ import "../styles.css";
 
 <script>
   import Alpine from "alpinejs";
+  import persist from "@alpinejs/persist";
+
+  Alpine.plugin(persist);
 
   const LOCAL_STORAGE_THEME_KEY = "saved-theme";
 
@@ -30,7 +33,12 @@ import "../styles.css";
   }));
 </script>
 
-<html lang="en" class="size-full" x-data="{theme: theme()}" data-theme="light">
+<html
+  lang="en"
+  class="size-full"
+  x-data="{theme: $persist(window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark')}"
+  data-theme="light"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -47,8 +55,8 @@ import "../styles.css";
 
       <div class="flex-none">
         <ThemeSwitcher
-          x-bind:checked="theme.current === 'dark'"
-          x-on:change="theme.setTheme($event.target.checked ? 'dark' : 'light')"
+          x-bind:checked="theme === 'dark'"
+          x-on:change="theme = $event.target.checked ? 'dark' : 'light'"
         />
       </div>
     </div>
