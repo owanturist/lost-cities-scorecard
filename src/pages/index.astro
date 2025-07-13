@@ -4,35 +4,37 @@ import Layout from "../layouts/Layout.astro";
 const EXPEDITIONS = [
   {
     name: "blue",
-    bg: "bg-blue-500",
+    background: "bg-blue-500",
     text: "text-blue-500",
-    variable: "--color-blue-500",
+    border: "border-blue-500",
   },
   {
     name: "yellow",
-    bg: "bg-yellow-500",
+    background: "bg-yellow-500",
     text: "text-yellow-500",
-    variable: "--color-yellow-500",
+    border: "border-yellow-500",
   },
   {
     name: "gray",
-    bg: "bg-gray-200",
+    background: "bg-gray-200",
     text: "text-gray-200",
-    variable: "--color-gray-200",
+    border: "border-gray-200",
   },
   {
     name: "green",
-    bg: "bg-green-500",
+    background: "bg-green-500",
     text: "text-green-500",
-    variable: "--color-green-500",
+    border: "border-green-500",
   },
   {
     name: "red",
-    bg: "bg-red-500",
+    background: "bg-red-500",
     text: "text-red-500",
-    variable: "--color-red-500",
+    border: "border-red-500",
   },
 ];
+
+const WAGERS = [1, 2, 3];
 
 const SCORES = [
   { score: 2, emoji: "2️⃣" },
@@ -51,9 +53,32 @@ const SCORES = [
   import Alpine from "alpinejs";
 
   Alpine.data("expedition", () => ({
-    wagers: 0,
-    rotateWagers() {
-      this.wagers = (this.wagers + 1) % 4;
+    wagers: new Set<number>(),
+    toggleWager(wager: number) {
+      // uncheck higher wagers
+      if (wager < this.wagers.size) {
+        for (const index of this.wagers) {
+          if (index > wager) {
+            this.wagers.delete(index);
+          }
+        }
+      }
+
+      // check all wagers up to the selected one
+      else if (wager > this.wagers.size) {
+        for (let index = 0; index < wager; index++) {
+          this.wagers.add(index + 1);
+        }
+      }
+
+      // uncheck all wagers up from the selected one
+      else {
+        for (const index of this.wagers) {
+          if (index >= wager) {
+            this.wagers.delete(index);
+          }
+        }
+      }
     },
 
     scores: new Set<number>(),
@@ -66,7 +91,7 @@ const SCORES = [
     },
 
     get totalScore() {
-      const totalCards = this.scores.size + this.wagers;
+      const totalCards = this.scores.size + this.wagers.size;
 
       if (totalCards === 0) {
         return 0;
@@ -77,9 +102,11 @@ const SCORES = [
         0
       );
 
+      const expeditionCost = 20;
       const bigExpeditionBonus = totalCards >= 8 ? 20 : 0;
+      const multiplier = this.wagers.size + 1;
 
-      return (scores - 20) * (this.wagers + 1) + bigExpeditionBonus;
+      return (scores - expeditionCost) * multiplier + bigExpeditionBonus;
     },
   }));
 </script>
@@ -99,7 +126,7 @@ const SCORES = [
           <th></th>
 
           {
-            EXPEDITIONS.map(({ bg }) => (
+            EXPEDITIONS.map(({ background: bg }) => (
               <th>
                 <div class:list={["m-auto size-6 rounded-full", bg]} />
               </th>
@@ -109,24 +136,26 @@ const SCORES = [
       </thead>
 
       <tbody>
-        <tr>
-          <th class="text-xl">🤝</th>
+        {
+          WAGERS.map((wager) => (
+            <tr>
+              <th class="text-xl">🤝</th>
 
-          {
-            EXPEDITIONS.map(({ name, variable }) => (
-              <td>
-                <button
-                  name={`wager-${name}`}
-                  x-text={`${name}.wagers`}
-                  x-on:click={`(${name}.rotateWagers())`}
-                  style={{ "--btn-color": `var(${variable})` }}
-                  x-bind:class={`${name}.wagers === 0 ? 'btn-outline' : 'text-accent-content'`}
-                  class="btn btn-xs"
-                />
-              </td>
-            ))
-          }
-        </tr>
+              {EXPEDITIONS.map(({ name, background, border }) => (
+                <td>
+                  <button
+                    name={`${name}-wager-${wager}`}
+                    x-on:click={`${name}.toggleWager(${wager})`}
+                    x-bind:class={`${name}.wagers.has(${wager}) && '${background}'`}
+                    class={`btn btn-square btn-xs ${border}`}
+                  >
+                    🤝
+                  </button>
+                </td>
+              ))}
+            </tr>
+          ))
+        }
 
         {
           SCORES.map(({ score, emoji }) => (
@@ -136,7 +165,7 @@ const SCORES = [
               {EXPEDITIONS.map(({ name, text }) => (
                 <td>
                   <input
-                    name={`score-${name}-${score}`}
+                    name={`${name}-score-${score}`}
                     type="checkbox"
                     class:list={["checkbox", text]}
                     x-bind:checked={`${name}.scores.has(${score})`}
