@@ -24,6 +24,8 @@ const EXPEDITIONS = [
   },
 ];
 
+const GRID_TEMPLATE_AREAS = EXPEDITIONS.map(({ name }) => name);
+
 const WAGERS = [1, 2, 3];
 
 const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -35,6 +37,11 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   const EXPEDITION_COST = 20;
 
   Alpine.data("expedition", () => ({
+    reset() {
+      this.wagers.clear();
+      this.scores.clear();
+    },
+
     get size() {
       return this.wagers.size + this.scores.size;
     },
@@ -125,6 +132,8 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   <div
     class="py-3"
     x-data={`{
+      mirror: $persist(false),
+    
       ${EXPEDITIONS.map(({ name }) => `${name}: expedition(),`).join("")}
 
       get total() {
@@ -138,17 +147,25 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
       get totalSign() {
         return this.total < 0 ? '-' : '+';
       },
+
+      reset() {
+        ${EXPEDITIONS.map(({ name }) => `this.${name}.reset();`).join("")}
+      }
     }`}
   >
-    <table class="table table-sm text-center">
-      <tbody>
+    <table
+      class="!grid table table-sm text-center"
+      x-bind:style={`'grid-template-areas:' + (mirror ? '"${GRID_TEMPLATE_AREAS.slice().reverse().join(" ")}";' : '"${GRID_TEMPLATE_AREAS.join(" ")}";')`}
+    >
+      <tbody class="grid grid-cols-subgrid col-span-full">
         {
           WAGERS.map((wager) => (
-            <tr>
+            <tr class="grid grid-cols-subgrid col-span-full">
               {EXPEDITIONS.map(({ name, btn }) => (
-                <td>
+                <td style={`grid-area:${name};`}>
                   <button
                     name={`${name}-wager-${wager}`}
+                    type="button"
                     role="checkbox"
                     x-bind:aria-checked={`${name}.wagers.has(${wager})`}
                     x-on:click={`${name}.toggleWager(${wager})`}
@@ -167,11 +184,12 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
         {
           SCORES.map((score) => (
-            <tr>
+            <tr class="grid grid-cols-subgrid col-span-full">
               {EXPEDITIONS.map(({ name, btn }) => (
-                <td>
+                <td style={`grid-area:${name};`}>
                   <button
                     name={`${name}-score-${score}`}
+                    type="button"
                     role="checkbox"
                     x-bind:aria-checked={`${name}.scores.has(${score})`}
                     x-on:click={`(${name}.toggleScore(${score}))`}
@@ -188,11 +206,11 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
           ))
         }
 
-        <tfoot class="border-t-4">
-          <tr>
+        <tfoot class="grid grid-cols-subgrid col-span-full border-t-4">
+          <tr class="grid grid-cols-subgrid col-span-full">
             {
               EXPEDITIONS.map(({ name }, index, arr) => (
-                <td>
+                <td style={`grid-area:${name};`}>
                   <span
                     class="tooltip w-full select-none underline-offset-4 decoration-dotted"
                     x-bind:class={`${name}.totalScore === 0 ? 'cursor-default' : 'cursor-help underline'`}
@@ -221,31 +239,75 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
       </tbody>
     </table>
 
-    <div class="mt-2 flex justify-center font-mono text-6xl">
-      <span class="countdown countdown-sign">
-        <span
-          x-bind:style="'--value:' + Math.sign(total) + ';'"
-          aria-live="polite"
-          x-text="totalSign"
-          x-bind:aria-label="totalSign"
+    <section
+      class="mt-2 flex flex-row px-3 gap-8 justify-around items-center content-center"
+    >
+      <button
+        role="checkbox"
+        type="button"
+        class="btn btn-primary btn-circle not-aria-checked:btn-outline"
+        x-bind:aria-checked="mirror"
+        x-on:click="mirror = !mirror"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
         >
-        </span>
-      </span>
+          <g fill="currentColor" fill-rule="evenodd">
+            <path
+              color="currentColor"
+              overflow="visible"
+              d="M7 1036.362h2v16H7z"
+              transform="translate(0 -1036.362)"></path>
+            <path d="M6 2v3H2v8h4v1H1V2zM10 2v3h4v8h-4v1h5V2z"></path>
+          </g>
+        </svg>
+      </button>
 
-      <template x-for="digit of totalDigits">
-        <span class="countdown countdown-digit">
+      <div class="flex justify-center font-mono text-6xl">
+        <span class="countdown countdown-sign">
           <span
-            x-bind:style="'--value:' + digit + ';'"
+            x-bind:style="'--value:' + Math.sign(total) + ';'"
             aria-live="polite"
-            x-text="digit"
-            x-bind:aria-label="digit"
+            x-text="totalSign"
+            x-bind:aria-label="totalSign"
           >
           </span>
         </span>
-      </template>
+        <template x-for="digit of totalDigits">
+          <span class="countdown countdown-digit">
+            <span
+              x-bind:style="'--value:' + digit + ';'"
+              aria-live="polite"
+              x-text="digit"
+              x-bind:aria-label="digit"
+            >
+            </span>
+          </span>
+        </template>
+        <!-- balance the digits in middle -->
+        <span>&nbsp;</span>
+      </div>
 
-      <!-- balance the digits in middle -->
-      <span>&nbsp;</span>
-    </div>
+      <button
+        type="button"
+        class="btn btn-primary btn-circle btn-outline"
+        x-on:click="reset()"
+      >
+        <svg
+          class="fill-current"
+          width="16"
+          height="16"
+          viewBox="0 0 1920 1920"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
+            fill-rule="evenodd"></path>
+        </svg>
+      </button>
+    </section>
   </div>
 </Root>
