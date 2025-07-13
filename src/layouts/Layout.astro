@@ -12,7 +12,13 @@ import "../styles.css";
     <title>Lost Cities Scorecard</title>
   </head>
 
-  <body class="size-full">
-    <slot />
+  <body class="size-full flex flex-col">
+    <div class="navbar bg-base-200 shadow-sm">
+      <a class="btn btn-ghost text-xl">Lost Cities Scorecard</a>
+    </div>
+
+    <div class="overflow-y-auto">
+      <slot />
+    </div>
   </body>
 </html>
