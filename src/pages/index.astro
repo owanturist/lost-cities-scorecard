@@ -36,17 +36,7 @@ const EXPEDITIONS = [
 
 const WAGERS = [1, 2, 3];
 
-const SCORES = [
-  { score: 2, emoji: "2️⃣" },
-  { score: 3, emoji: "3️⃣" },
-  { score: 4, emoji: "4️⃣" },
-  { score: 5, emoji: "5️⃣" },
-  { score: 6, emoji: "6️⃣" },
-  { score: 7, emoji: "7️⃣" },
-  { score: 8, emoji: "8️⃣" },
-  { score: 9, emoji: "9️⃣" },
-  { score: 10, emoji: "🔟" },
-];
+const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 ---
 
 <script>
@@ -125,8 +115,6 @@ const SCORES = [
     <table class="table table-sm text-center">
       <thead>
         <tr>
-          <th></th>
-
           {
             EXPEDITIONS.map(() => (
               <th>
@@ -141,8 +129,6 @@ const SCORES = [
         {
           WAGERS.map((wager) => (
             <tr>
-              <th class="text-xl">🤝</th>
-
               {EXPEDITIONS.map(({ name, background, border }) => (
                 <td>
                   <button
@@ -165,19 +151,24 @@ const SCORES = [
         }
 
         {
-          SCORES.map(({ score, emoji }) => (
+          SCORES.map((score) => (
             <tr>
-              <th class="text-xl">{emoji}</th>
-
-              {EXPEDITIONS.map(({ name, text }) => (
+              {EXPEDITIONS.map(({ name, text, border, background }) => (
                 <td>
-                  <input
+                  <button
                     name={`${name}-score-${score}`}
-                    type="checkbox"
-                    class:list={["checkbox", text]}
-                    x-bind:checked={`${name}.scores.has(${score})`}
-                    x-on:change={`(${name}.toggleScore(${score}))`}
-                  />
+                    role="checkbox"
+                    x-bind:aria-checked={`${name}.scores.has(${score})`}
+                    x-on:click={`(${name}.toggleScore(${score}))`}
+                    class:list={[
+                      "btn btn-square btn-xs aria-checked:text-accent-content",
+                      text,
+                      border,
+                      background.checked,
+                    ]}
+                  >
+                    {score}
+                  </button>
                 </td>
               ))}
             </tr>
@@ -186,8 +177,6 @@ const SCORES = [
 
         <tfoot>
           <tr>
-            <th class="text-xl rotate-90">🧮</th>
-
             {
               EXPEDITIONS.map(({ name }) => (
                 <td>
