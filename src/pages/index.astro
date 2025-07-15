@@ -24,8 +24,6 @@ const EXPEDITIONS = [
   },
 ];
 
-const GRID_TEMPLATE_AREAS = EXPEDITIONS.map(({ name }) => name);
-
 const WAGERS = [1, 2, 3];
 
 const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -132,6 +130,8 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
   <div
     class="py-3"
     x-data={`{
+      history: $persist([]),
+    
       mirror: $persist(false),
     
       ${EXPEDITIONS.map(({ name }) => `${name}: expedition(),`).join("")}
@@ -149,8 +149,21 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
       },
 
       reset() {
+        this.history.push(this.total);
+        this.history = this.history.slice(-2)
+
         ${EXPEDITIONS.map(({ name }) => `this.${name}.reset();`).join("")}
-      }
+      },
+
+      get totalAllGames() {
+        return this.history.reduce((acc, score) => acc + score, this.total);
+      },
+
+      get totalAllGamesHint() {
+        const prev = this.history.flatMap(score => [Math.sign(score) >= 0 ? '+' : '-', Math.abs(score)]);
+
+        return [...prev, '=', this.totalAllGames].join(' ');
+      },
     }`}
   >
     <table class="!grid grid-cols-5 table table-sm text-center">
@@ -212,6 +225,7 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
             {
               EXPEDITIONS.map(({ name }, index, arr) => (
                 <td
+                  class="relative"
                   x-bind:style={`'order:' + (mirror ? ${arr.length - index} : ${index}) + ';'`}
                 >
                   <span
@@ -233,7 +247,11 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
                   </span>
 
                   {index > 0 && (
-                    <span class="absolute right-full inset-y-0 flex items-center">
+                    <span
+                      x-cloak
+                      class="absolute inset-y-0 flex items-center"
+                      x-bind:class="mirror ? 'left-full -translate-x-1/2' : 'right-full translate-x-1/2'"
+                    >
                       +
                     </span>
                   )}
@@ -312,6 +330,14 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
             fill-rule="evenodd"></path>
         </svg>
       </button>
+    </section>
+
+    <section
+      x-cloak
+      x-show="history.length > 0"
+      class="mt-2 flex flex-row px-6 gap-8 justify-end"
+    >
+      <code x-text="totalAllGamesHint"></code>
     </section>
   </div>
 </Root>
