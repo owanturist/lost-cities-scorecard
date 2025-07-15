@@ -219,11 +219,14 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
                     x-bind:class={`${name}.totalScore === 0 ? 'cursor-default' : 'cursor-help underline'`}
                   >
                     <span
-                      class:list={[
-                        "tooltip-content",
-                        index < 2 && "!left-0 !right-auto !transform-none",
-                        index > 2 && "!right-0 !left-auto !transform-none",
-                      ]}
+                      class="tooltip-content"
+                      x-bind:class={
+                        index < 2
+                          ? "mirror ? '!right-0 !left-auto !transform-none' : '!left-0 !right-auto !transform-none'"
+                          : index > 2
+                            ? "mirror ? '!left-0 !right-auto !transform-none' : '!right-0 !left-auto !transform-none'"
+                            : "''"
+                      }
                       x-text={`${name}.totalScoreHint`}
                     />
                     <span x-text={`${name}.totalScore`} />
