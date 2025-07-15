@@ -55,3 +55,7 @@
     }
   }
 }
+
+.btn.btn-outline {
+  @apply focus-visible:bg-transparent;
+}
