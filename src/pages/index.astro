@@ -54,29 +54,10 @@ const SCORES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     wagers: new Set<number>(),
     toggleWager(wager: number) {
-      // uncheck higher wagers
-      if (wager < this.wagers.size) {
-        for (const index of this.wagers) {
-          if (index > wager) {
-            this.wagers.delete(index);
-          }
-        }
-      }
-
-      // check all wagers up to the selected one
-      else if (wager > this.wagers.size) {
-        for (let index = 0; index < wager; index++) {
-          this.wagers.add(index + 1);
-        }
-      }
-
-      // uncheck all wagers up from the selected one
-      else {
-        for (const index of this.wagers) {
-          if (index >= wager) {
-            this.wagers.delete(index);
-          }
-        }
+      if (this.wagers.has(wager)) {
+        this.wagers.delete(wager);
+      } else {
+        this.wagers.add(wager);
       }
     },
 
